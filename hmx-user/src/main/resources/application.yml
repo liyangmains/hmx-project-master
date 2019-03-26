@@ -12,6 +12,8 @@ spring:
     initial-size: 5
   jmx:
     enabled: false
+  application:
+    name: hmx-user
         
 mybatis:
   mapper-locations: classpath*:com/hmx/*/mapper/*.xml
