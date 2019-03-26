@@ -90,6 +90,7 @@
 
 		  <build>
 			<finalName>hmx-core</finalName>
+			<!--
 			  <plugins>
 				  <plugin>
 					  <groupId>org.mybatis.generator</groupId>
@@ -115,16 +116,17 @@
 							  </goals>
 						  </execution>
 					  </executions>
-					  <configuration>
+					  <configuration>-->
 						  <!--允许移动生成的文件 -->
-						  <verbose>true</verbose>
+						  <!--<verbose>true</verbose>-->
 						  <!-- 是否覆盖 -->
-						  <overwrite>false</overwrite>
+						  <!--<overwrite>false</overwrite>-->
 						  <!-- 自动生成的配置 -->
-						  <configurationFile>
+						 <!-- <configurationFile>
 							  src/main/resources/mybatis-generator.xml</configurationFile>
 					  </configuration>
 				  </plugin>
 			  </plugins>
+			-->
 		  </build>
 </project>
