@@ -1,5 +1,8 @@
 server:
   port: 8089
+  max-http-header-size: 10240000
+  tomcat:
+    max-http-post-size: 10240000
 
 spring:
     application:
@@ -21,6 +24,15 @@ spring:
       expose-session-attributes: false
       expose-spring-macro-helpers: false
       suffix: .html
+    servlet:
+      multipart:
+        max-file-size : 10Mb
+        max-request-size : 12Mb
+
+logging:
+  file: admin.log
+  path: /logs
+
 mybatis:
   mapper-locations: classpath*:com/hmx/*/mapper/*.xml
   configuration:
@@ -45,3 +57,20 @@ SMSVerificationTemplate: "【黄梅戏资源库】您的验证码是code，请�
 #        testOnReturn: false
 #        poolPreparedStatements: true
 #        maxOpenPreparedStatements: 20
+
+#阿里oos accessKeyId accessKeySecret
+accessKeyId: LTAIaeZo5lNZpDBd
+accessKeySecret: HSB7GdPp998ziaGiVK6rgbrHhHSwAl
+imageType: default
+#默认png
+imageExt: png,jpg,jpeg,gif
+videoExt: MP4,TS,3GP,MPG,MPEG,MPE,DAT,VOB,ASF,AVI,WMV,ASF,FLV,F4V,RM,RMVB,MOV,MKV,M3U8,DV,GIF,M2T,M4V,MJ2,MJPEG,MTS,OGG,QT,SWF,WEBM
+#阿里文件上传：pdf,epub
+oss: 
+  endpoint: http://oss-cn-hangzhou.aliyuncs.com
+  accessKeyId: LTAIk9cA9ccLsyak
+  accessKeySecret: LN0d98MfMdc8WJb8qsBmlEaTNLaoq6
+  bucketName: zhonghuazhu
+  ossIsFormal: false
+  physicsrootpath: C:\\files
+  serverip: https://zhonghuazhu.oss-cn-hangzhou.aliyuncs.com

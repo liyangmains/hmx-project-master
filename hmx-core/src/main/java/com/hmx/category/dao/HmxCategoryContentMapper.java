@@ -39,7 +39,7 @@ public interface HmxCategoryContentMapper{
      * @param categoryContentId
      * @return
      */
-    Map<String,Object> selectCategoryContentById(Integer categoryContentId);
+    HmxCategoryContent selectCategoryContentById(Integer categoryContentId);
     /**
      * 内容列表查询
      * @param parameter
@@ -47,4 +47,23 @@ public interface HmxCategoryContentMapper{
      */
     List<Map<String,Object>> selectCategoryContentTable(Map<String,Object> parameter);
     int countCategoryContentTable(Map<String,Object> parameter);
+    /**
+     * 内容信息详情查询
+     * @param categoryContentId
+     * @return
+     */
+    Map<String,Object> selectContentInfoByContentId(Integer categoryContentId);
+    /**
+     * PC内容列表查询
+     * @param parameter
+     * @return
+     */
+    List<Map<String,Object>> selectCategoryContentTableByPc(Map<String,Object> parameter);
+    int countCategoryContentTableByPc(Map<String,Object> parameter);
+    /**
+     * 查看排行榜信息
+     * @param categoryId
+     * @return
+     */
+    Map<String,Object>selectRankingListByCategoryId(Integer categoryId);
 }

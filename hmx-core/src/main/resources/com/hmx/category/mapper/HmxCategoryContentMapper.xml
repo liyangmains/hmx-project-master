@@ -297,6 +297,9 @@ createid = #{createid,jdbcType=INTEGER}
       <if test="version != null" >
         version = #{version,jdbcType=INTEGER} ,
       </if>
+      <if test="version == null" >
+        version = version+1 ,
+      </if>
       <if test="createid != null" >
         createid = #{createid,jdbcType=INTEGER} ,
       </if>
@@ -324,7 +327,7 @@ createid = #{createid,jdbcType=INTEGER}
     where category_content_id = #{categoryContentId,jdbcType=INTEGER}
   </update>
    <!-- 内容详情 ↓ -->
-   <select id="selectCategoryContentById" resultType="Map">
+   <select id="selectCategoryContentById" resultType="com.hmx.category.entity.HmxCategoryContent">
    select cc.category_content_id as 'categoryContentId',cc.category_id as 'categoryId',
        cc.category_title as 'categoryTitle',cc.category_content as 'categoryContent',
        cc.content_type as 'contentType',cc.content_images as 'contentImages',
@@ -397,6 +400,103 @@ createid = #{createid,jdbcType=INTEGER}
 		    </if>
 		</trim>
 	</where>
+   </select>
+   <!-- ↑ -->
+   <!-- 内容详情↓ -->
+   	<select id="selectContentInfoByContentId" resultType="Map">
+  	  select 
+		cc.category_content_id as 'categoryContentId',cc.category_id as 'categoryId',
+		cc.category_title as 'categoryTitle',cc.category_content as 'categoryContent',
+		cc.content_type as 'contentType',cc.content_images as 'contentImages',
+		cc.movie_id as 'movieId',cc.music_id as 'musicId',cc.browse_num+1 as 'browseNum',
+		cc.create_time as 'createTime',cc.new_time as 'newTime',m.video_id as 'videoId',
+		c.category_type as 'categoryType' 
+		from hmx_category_content cc 
+		LEFT JOIN hmx_category c on c.category_id=cc.category_id and c.state=0
+		LEFT JOIN hmx_movie m on m.movie_id=cc.movie_id and m.state=0 and m.video_status=1
+		where cc.category_content_id=#{categoryContentId} and cc.state=0
+   	</select>
+   <!-- ↑ -->
+    <!-- PC内容列表 ↓ -->
+   <select id="selectCategoryContentTableByPc" resultType="Map">
+   select cc.category_content_id as 'categoryContentId',cc.category_id as 'categoryId',
+       cc.category_title as 'categoryTitle',cc.category_content as 'categoryContent',
+       cc.content_type as 'contentType',cc.content_images as 'contentImages',
+       cc.movie_id as 'movieId',cc.music_id as 'musicId',cc.browse_num as 'browseNum',
+       cc.create_time as 'createTime',c.category_name as 'categoryName',
+       c.category_type as 'categoryType'
+	from hmx_category_content cc 
+	LEFT JOIN hmx_category c on c.category_id=cc.category_id
+	LEFT JOIN hmx_movie m on m.movie_id=cc.movie_id
+	<where>
+		<trim suffixOverrides="and">
+			<if test="state != null">
+			   cc.state=#{state} and 
+		    </if>
+		    <if test="beginDate != null">
+		  	   cc.create_time &gt;= #{beginDate} and 
+		  	</if>
+		  	<if test="endDate != null">
+	   		   cc.create_time &lt;= #{endDate} and 
+		    </if>
+		    <if test="categoryId != null">
+			   cc.category_id = #{categoryId} and 
+		    </if>
+		    <if test="categoryTitle != null">
+		       cc.category_title like concat("%",#{categoryTitle},"%") and 
+		    </if>
+		</trim>
+	</where>
+	ORDER BY cc.create_time desc 
+		<if test="limit != null" >
+	      <if test="offset != null" >
+	        limit ${offset}, ${limit}
+	      </if>
+	      <if test="offset == null" >
+	        limit ${limit}
+	      </if>
+	    </if>
+   </select>
+   <select id="countCategoryContentTableByPc" resultType="Integer">
+   select count(*) 
+	from hmx_category_content cc 
+	LEFT JOIN hmx_category c on c.category_id=cc.category_id
+	LEFT JOIN hmx_movie m on m.movie_id=cc.movie_id
+	<where>
+		<trim suffixOverrides="and">
+			<if test="state != null">
+			   cc.state=#{state} and 
+		    </if>
+		    <if test="beginDate != null">
+		  	   cc.create_time &gt;= #{beginDate} and 
+		  	</if>
+		  	<if test="endDate != null">
+	   		   cc.create_time &lt;= #{endDate} and 
+		    </if>
+		    <if test="categoryId != null">
+			   cc.category_id = #{categoryId} and 
+		    </if>
+		    <if test="categoryTitle != null">
+		       cc.category_title like concat("%",#{categoryTitle},"%") and 
+		    </if>
+		</trim>
+	</where>
+   </select>
+   <!-- ↑ -->
+   <!-- 查询排行榜信息↓ -->
+   <select id="selectRankingListByCategoryId" resultMap="resultMapRankingListByCategoryId">
+   select c.category_name as 'categoryName',c.category_id,c.category_id as 'categoryId',c.category_type as 'categoryType'
+   from hmx_category c 
+   where c.category_id=#{categoryId} and c.is_close=0 and c.state=0
+   </select>
+   <resultMap type="Map" id="resultMapRankingListByCategoryId">
+   	<collection property="contentList" column="category_id" ofType="ArrayList" select="selectRankingContent"/>
+   </resultMap>
+   <select id="selectRankingContent" resultType="Map">
+   select cc.category_content_id as 'categoryContentId',cc.category_title as 'categoryTitle' 
+   from hmx_category_content cc where cc.category_id=#{category_id} and cc.state=0
+   ORDER BY cc.browse_num desc
+   LIMIT 10
    </select>
    <!-- ↑ -->
 </mapper>

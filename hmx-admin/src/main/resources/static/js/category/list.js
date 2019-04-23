@@ -48,27 +48,26 @@ function initTable() {
                 halign: 'center',
                 align: 'center',
                 formatter: function (value, row, index) {
-                    var isUpdate = '<a href="javascript:void(0)" class="update"  title="修改" onclick="openEidt(this)">修改</a>';
+                    var isUpdate = '<a href="javascript:void(0)" class="update"  title="修改" onclick="openAdd(this)">修改</a>';
                     var isDelete = '<a href="javascript:void(0)" class="delete" title="删除" onclick="deleteArticle(' + row.id + ')">删除</a>';
                     return isUpdate + isDelete;
                 }
             }
         ]
     };
-    $('#articleList').bootstrapTable($.initTableArg(option));
+    $('#tradeList').bootstrapTable($.initTableArg(option));
 } //表格
 
 function getSearchParams() {
     var params = {
-        title: $("#title").val(),
-        type: $("#type").val()
+        categoryName: $("#type").val()
     }
     return params;
 }
 
 //列表搜索
 function searchList() {
-    $("#articleList").bootstrapTable('refresh');
+    $("#tradeList").bootstrapTable('refresh');
 }
 
 function openAdd(element) {
@@ -76,42 +75,9 @@ function openAdd(element) {
     if (element != null) {
         id = $(element).parent().parent().find("td").eq(0).text()
     }
-    $.fn.showWindow({title: '相关信息'}, '/category/initAdd', function (model) {
+    $.fn.showWindow({title: '相关信息'}, '/category/initAdd?id=' + id, function (model) {
         $("#tradeList").attr("modelValue", model.attr("id"));
     });
-}
-
-
-function updateArticle() {
-    validParam();
-    $('#formUpdate').bootstrapValidator('validate');
-
-    var  data = getParameter();
-    if(data != null){
-        if ($("#formUpdate").data('bootstrapValidator').isValid()) {//获取验证结果，如果成功，执行下面代码
-            $.ajax({
-                url: "/category/addArticle",
-                data: getParameter(),
-                type: "Post",
-                dataType: "json",
-                cache: false,//上传文件无需缓存
-                processData: false,//用于对data参数进行序列化处理 这里必须false
-                contentType: false, //必须
-                success: function (result) {
-                    if(result.status == 10000){
-                        $.fn.messageBox('success', '操作成功！',function () {
-                            $("#myModal").remove();
-                            $(".modal-backdrop").remove();
-                            searchList()
-                        });
-                    }else {
-                        $.fn.messageBox('error', '更新失败！',function () {
-                        });
-                    }
-                },
-            })
-        }
-    }
 }
 
 function deleteArticle(id) {

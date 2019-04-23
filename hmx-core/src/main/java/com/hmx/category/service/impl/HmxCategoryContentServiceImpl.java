@@ -14,7 +14,10 @@ import org.springframework.util.StringUtils;
 
 import com.hmx.category.service.HmxCategoryContentService;
 import com.hmx.utils.enums.DataState;
+import com.hmx.utils.result.Config;
 import com.hmx.utils.result.PageBean;
+import com.hmx.utils.result.ResultBean;
+import com.hmx.utils.upload.InitVodClients;
 import com.hmx.category.entity.HmxCategoryContent;
 import com.hmx.category.dto.HmxCategoryContentDto;
 import com.hmx.category.entity.HmxCategoryContentExample;
@@ -29,6 +32,8 @@ import com.hmx.category.dao.HmxCategoryContentMapper;
  
  	@Autowired
 	private HmxCategoryContentMapper hmxCategoryContentMapper;
+ 	@Autowired
+	private InitVodClients initVodClients;
 	
 	
 	/**
@@ -121,16 +126,16 @@ import com.hmx.category.dao.HmxCategoryContentMapper;
   		if ( hmxCategoryContentDto.getCategoryId() != null && hmxCategoryContentDto.getCategoryId() != 0 ) {
 			where.andCategoryIdEqualTo( hmxCategoryContentDto.getCategoryId() );
 		}
-  		if ( StringUtils.isEmpty( hmxCategoryContentDto.getCategoryTitle() ) ) {
+  		if ( !StringUtils.isEmpty( hmxCategoryContentDto.getCategoryTitle() ) ) {
 			where.andCategoryTitleEqualTo( hmxCategoryContentDto.getCategoryTitle() );
 		}
-  		if ( StringUtils.isEmpty( hmxCategoryContentDto.getCategoryContent() ) ) {
+  		if ( !StringUtils.isEmpty( hmxCategoryContentDto.getCategoryContent() ) ) {
 			where.andCategoryContentEqualTo( hmxCategoryContentDto.getCategoryContent() );
 		}
   		if ( hmxCategoryContentDto.getContentType() != null && hmxCategoryContentDto.getContentType() != 0 ) {
 			where.andContentTypeEqualTo( hmxCategoryContentDto.getContentType() );
 		}
-  		if ( StringUtils.isEmpty( hmxCategoryContentDto.getContentImages() ) ) {
+  		if ( !StringUtils.isEmpty( hmxCategoryContentDto.getContentImages() ) ) {
 			where.andContentImagesEqualTo( hmxCategoryContentDto.getContentImages() );
 		}
   		if ( hmxCategoryContentDto.getMovieId() != null && hmxCategoryContentDto.getMovieId() != 0 ) {
@@ -293,7 +298,7 @@ import com.hmx.category.dao.HmxCategoryContentMapper;
      * @param categoryContentId
      * @return
      */
-    public Map<String,Object> selectCategoryContentById(Integer categoryContentId){
+    public HmxCategoryContent selectCategoryContentById(Integer categoryContentId){
     	return hmxCategoryContentMapper.selectCategoryContentById(categoryContentId);
     }
     /**
@@ -325,6 +330,69 @@ import com.hmx.category.dao.HmxCategoryContentMapper;
 	    List<Map<String,Object>> data = hmxCategoryContentMapper.selectCategoryContentTable(parameter);
 	    page.setPage(data);
     	return page;
+    }
+    /**
+     * 内容信息详情查询
+     * 更新内容浏览量+1
+     * @param categoryContentId
+     * @return
+     */
+    public Map<String,Object> selectContentInfoByContentId(Integer categoryContentId){
+    	Map<String,Object> resultMap = hmxCategoryContentMapper.selectContentInfoByContentId(categoryContentId);
+    	resultMap.put("videoUrl", null);
+    	if(resultMap != null){
+    		HmxCategoryContent hmxCategoryContent = new HmxCategoryContent();
+    		hmxCategoryContent.setCategoryContentId(categoryContentId);
+    		hmxCategoryContent.setBrowseNum(Integer.parseInt(resultMap.get("browseNum").toString()));
+    		update(hmxCategoryContent);
+    		if(resultMap.get("videoId") != null){
+    			Map<String,Object> resultUrl = initVodClients.getUrl(resultMap.get("videoId").toString());
+    			boolean flag = Boolean.parseBoolean(resultUrl.get("flag").toString());
+    			if(flag){
+    				resultMap.put("videoUrl", resultUrl.get("url"));
+    			}
+    		}
+    	}
+    	return resultMap;
+    }
+    /**
+     * Pc内容列表查询
+     * @return
+     */
+    public PageBean<Map<String,Object>> selectCategoryContentTableByPc(PageBean<Map<String,Object>> page,HmxCategoryContentDto hmxCategoryContentDto){
+    	Map<String,Object> parameter = new HashMap<String,Object>();
+    	parameter.put("offset", page.getStartOfPage());
+    	parameter.put("limit", page.getPageSize());
+    	parameter.put("state", DataState.正常.getState());
+    	if(!StringUtils.isEmpty(hmxCategoryContentDto.getCategoryTitle())){
+    		parameter.put("categoryTitle", hmxCategoryContentDto.getCategoryTitle());
+    	}
+    	if(hmxCategoryContentDto.getBeginDate() != null){
+    		parameter.put("beginDate", hmxCategoryContentDto.getBeginDate());
+    	}
+    	if(hmxCategoryContentDto.getEndDate() != null){
+    		parameter.put("endDate", hmxCategoryContentDto.getEndDate());
+    	}
+    	if(hmxCategoryContentDto.getCategoryId() != null){
+    		parameter.put("categoryId", hmxCategoryContentDto.getCategoryId());
+    	}
+    	Integer count = hmxCategoryContentMapper.countCategoryContentTableByPc(parameter);
+	    Boolean haveData = page.setTotalNum((int)(long)count);
+	    if(!haveData){
+			return page;
+		}
+	    List<Map<String,Object>> data = hmxCategoryContentMapper.selectCategoryContentTableByPc(parameter);
+	    page.setPage(data);
+    	return page;
+    }
+    
+    /**
+     * 查看排行榜信息
+     * @param categoryId
+     * @return
+     */
+    public Map<String,Object>selectRankingListByCategoryId(Integer categoryId){
+    	return hmxCategoryContentMapper.selectRankingListByCategoryId(categoryId);
     }
 }
  
